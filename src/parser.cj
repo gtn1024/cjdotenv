@@ -15,6 +15,7 @@ struct Tuple<K, V> {
 const commentChar = r"#"
 const singleQuote = r"\'"
 const doubleQuote = r"\""
+const exportPrefix = "export"
 
 /**
  * Parse environment variables from a string.
@@ -123,9 +124,12 @@ func hasQuotePrefix(src: String) {
 }
 
 func locateKeyName(src: String) {
-    var s = src.trimAsciiStart()
-    if (s.startsWith("export ")) {
-        s = s[7..].trimAsciiStart()
+    var s = src.trimStart(isSpace)
+    if (s.startsWith(exportPrefix)) {
+        let tmp = s[exportPrefix.size..]
+        if (indexFunc(tmp, isSpace) == 0) {
+            s = tmp.trimStart(isSpace)
+        }
     }
 
     var offset = 0
