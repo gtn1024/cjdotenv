@@ -90,7 +90,7 @@ func extractVarValue(src: String) {
 
         let trimmed = line[0..endOfVar].trimStart(isSpace).trimEnd(isSpace)
 
-        return Tuple(trimmed, src[eolIndex..].trimAsciiStart())
+        return Tuple(trimmed, src[eolIndex..])
     }
 
     // find the closing quote
@@ -154,7 +154,7 @@ func locateKeyName(src: String) {
         }
     }
 
-    key = key.trimAsciiEnd()
+    key = key.trimEnd(isSpace)
     let rem = s[offset..].trimStart(isSpace)
     return Tuple<String, String>(key, rem)
 }
