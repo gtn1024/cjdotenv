@@ -72,14 +72,24 @@ func extractVarValue(src: String) {
 
         let line = src[0..eolIndex]
 
+        var endOfVar = line.size
+        if (endOfVar == 0) {
+            return Tuple("", src[eolIndex..])
+        }
+
         for (i in 0..line.size) {
             let c = Rune(line[i])
-            if (c == commentChar) {
-                return Tuple(line[0..i].trimAsciiEnd(), line[eolIndex..].trimAsciiStart())
+            if (c == commentChar && i > 0) {
+                if (isSpace(Rune(line[i - 1]))) {
+                    endOfVar = i
+                    break
+                }
             }
         }
 
-        return Tuple(line.trimAsciiEnd(), src[eolIndex..].trimAsciiStart())
+        let trimmed = line[0..endOfVar].trimStart(isSpace).trimEnd(isSpace)
+
+        return Tuple(trimmed, src[eolIndex..].trimAsciiStart())
     }
 
     // find the closing quote
