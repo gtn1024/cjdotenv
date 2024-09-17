@@ -82,7 +82,30 @@ func extractVarValue(src: String) {
         return Tuple(line.trimAsciiEnd(), src[eolIndex..].trimAsciiStart())
     }
 
-    Tuple<String, String>("", "")
+    // find the closing quote
+    let quoteChar = Rune(src[0])
+    for (i in 1..src.size) {
+        if (Rune(src[i]) != quoteChar) {
+            continue
+        }
+
+        if (Rune(src[i - 1]) == r"\\") {
+            continue
+        }
+
+        func trimFunc(c: Rune) {
+            return c == quoteChar
+        }
+        let value = src[0..i].trimStart(trimFunc).trimEnd(trimFunc)
+
+        if (quoteChar == doubleQuote) {
+            // process escape, variable substitution...
+        }
+
+        return Tuple(value, src[i + 1..])
+    }
+
+    throw ParseException("Unclosed quote in ${src}")
 }
 
 func hasQuotePrefix(src: String) {
