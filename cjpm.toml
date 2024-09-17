@@ -6,9 +6,9 @@
   description = "A Cangjie library to load environment variables from `.env`."
   link-option = ""
   name = "cjdotenv"
-  output-type = "executable"
+  output-type = "dynamic"
   override-compile-option = ""
   src-dir = ""
   target-dir = ""
-  version = "1.0.0"
+  version = "0.0.1"
   package-configuration = {}
