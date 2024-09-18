@@ -136,8 +136,17 @@ func testSubstitutions() {
     expectedValues["OPTION_C"] = "1"
     expectedValues["OPTION_D"] = "11"
     expectedValues["OPTION_E"] = None
+    expectedValues["OPTION_F"] = "default"
+    expectedValues["OPTION_G"] = "default"
+    expectedValues["OPTION_H"] = "-default"
+    expectedValues["OPTION_I"] = "-default"
+    expectedValues["OPTION_J"] = "\\-default"
+    expectedValues["OPTION_K"] = "-default"
+    expectedValues["OPTION_L"] = "default value"
+    expectedValues["OPTION_N"] = "default"
+    expectedValues["OPTION_M"] = "default"
 
-    @Expect(envVars().size, 5)
+    @Expect(envVars().size, 13)
     for ((k, v) in expectedValues) {
         @Expect(getEnv(k), v)
     }

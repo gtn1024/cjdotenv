@@ -29,12 +29,13 @@ let escapeRegex = Regex("\\\\.")
 public func parse(data: String) {
     let src = data.replace("\r\n", "\n")
 
-    parseData(src)
+    let vars = HashMap<String, String>()
+    parseData(src, vars)
+
+    vars
 }
 
-func parseData(src: String) {
-    let res = HashMap<String, String>()
-
+func parseData(src: String, out: HashMap<String, String>): Unit {
     var remain = src
 
     while (true) {
@@ -50,18 +51,16 @@ func parseData(src: String) {
             throw ParseException("Invalid statement near ${remain}")
         }
 
-        t = extractVarValue(left)
+        t = extractVarValue(left, out)
         let value = t.first
         left = t.second
 
-        res[key] = value
+        out[key] = value
         remain = left
     }
-
-    res
 }
 
-func extractVarValue(src: String) {
+func extractVarValue(src: String, vars: HashMap<String, String>) {
     let hasPrefix = hasQuotePrefix(src)
     if (!hasPrefix) {
         // unquoted cvalue, read until eol
@@ -93,7 +92,7 @@ func extractVarValue(src: String) {
 
         let trimmed = line[0..endOfVar].trimStart(isSpace).trimEnd(isSpace)
 
-        return Tuple(trimmed, src[eolIndex..])
+        return Tuple(expandVariables(trimmed, vars), src[eolIndex..])
     }
 
     // find the closing quote
@@ -114,7 +113,7 @@ func extractVarValue(src: String) {
 
         if (quoteChar == doubleQuote) {
             // process escape, variable substitution...
-            value = expandEscapes(value)
+            value = expandVariables(expandEscapes(value), vars)
         }
 
         return Tuple(value, src[i + 1..])
@@ -228,4 +227,63 @@ func indexOfNonSpaceChar(src: String) {
 
 func isSpace(c: Rune): Bool {
     [r" ", r"\t", r"\v", r"\f", r"\r"].contains(c)
+}
+
+// (\$)\{?([A-Z0-9_]+)(:.*)?\}?
+let expandVarRegex = Regex("(\\$)\\{?([A-Z0-9_]+)(:.*)?\\}?")
+
+func expandVariables(src: String, vars: HashMap<String, String>) {
+    var str = ""
+    var lastPos = 0
+
+    let matcher = expandVarRegex.matcher(src)
+    while (let Some(v) <- matcher.find()) {
+        let pos = v.matchPosition()
+
+        str += src[lastPos..pos.start]
+
+        let s = v.matchStr()
+        let t = getNameAndDefault(s)
+        let name = t.first
+        let default = t.second
+
+        str += match(vars.get(name)) {
+            case Some(v) => v
+            case None => default
+        }
+
+        lastPos = pos.end
+    }
+
+    str += src[lastPos..]
+
+    str
+}
+
+func getNameAndDefault(src: String) {
+    if (Rune(src[1]) != r"{") {
+        // without braces
+        return Tuple(src[1..], "")
+    }
+
+    let pos = src.indexOf(':') ?? -1
+    if (pos == -1) {
+        // without default value
+        return Tuple(src[2..src.size - 1], "")
+    }
+
+    let name = src[2..pos]
+    var default = src[pos + 1..src.size - 1]
+
+    if (default.size > 0) {
+        let c = Rune(default[0])
+        match (c) {
+            case r"-" => default = default[1..]
+            case _ => ()
+        }
+    }
+
+    default = default.trimStart(isSpace).trimEnd(isSpace)
+
+    Tuple(name, expandEscapes(default))
 }
