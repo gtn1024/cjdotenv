@@ -1,6 +1,7 @@
 package cjdotenv
 
 import std.collection.HashMap
+import std.regex.Regex
 
 struct Tuple<K, V> {
     let first: K
@@ -16,6 +17,8 @@ const commentChar = r"#"
 const singleQuote = r"\'"
 const doubleQuote = r"\""
 const exportPrefix = "export"
+
+let escapeRegex = Regex("\\\\.")
 
 /**
  * Parse environment variables from a string.
@@ -107,16 +110,43 @@ func extractVarValue(src: String) {
         func trimFunc(c: Rune) {
             return c == quoteChar
         }
-        let value = src[0..i].trimStart(trimFunc).trimEnd(trimFunc)
+        var value = src[0..i].trimStart(trimFunc).trimEnd(trimFunc)
 
         if (quoteChar == doubleQuote) {
             // process escape, variable substitution...
+            value = expandEscapes(value)
         }
 
         return Tuple(value, src[i + 1..])
     }
 
     throw ParseException("Unclosed quote in ${src}")
+}
+
+func expandEscapes(src: String) {
+    var str = ""
+    var lastPos = 0
+
+    let matcher = escapeRegex.matcher(src)
+    while (let Some(v) <- matcher.find()) {
+        let pos = v.matchPosition()
+
+        str += src[lastPos..pos.start]
+
+        let s = v.matchStr()
+        let c = s[1..]
+        match (c) {
+            case "n" => str += "\n"
+            case "r" => str += "\r"
+            case _ => str += c
+        }
+
+        lastPos = pos.end
+    }
+
+    str += src[lastPos..]
+
+    str
 }
 
 func hasQuotePrefix(src: String) {
