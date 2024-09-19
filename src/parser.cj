@@ -67,7 +67,7 @@ func getStatementStart(src: String): String {
         return ""
     }
 
-    return getStatementStart(src[pos..])
+    return getStatementStart(rem[pos..])
 }
 
 func extractKey(src: String) {

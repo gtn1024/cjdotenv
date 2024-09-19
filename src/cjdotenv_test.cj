@@ -16,7 +16,25 @@ func clearenv() {
 @Test
 func testLoadWithNoArgsLoadsDotEnv() {
     let e: PathException = @AssertThrows[PathException](load())
-    @Expect(".env", e.path)
+    @Expect(e.path, ".env")
+}
+
+@Test
+func testReadmeExample() {
+    clearenv()
+    let filename = "fixtures/readme.env"
+    load(filename)
+
+    let expectedValues = HashMap<String, ?String>()
+    expectedValues["DB_HOST"] = "localhost"
+    expectedValues["DB_USER"] = "postgres"
+    expectedValues["DB_PASS"] = "123456"
+    expectedValues["DB_DATABASE"] = "postgres"
+
+    @Expect(envVars().size, 4)
+    for ((k, v) in expectedValues) {
+        @Expect(getEnv(k), v)
+    }
 }
 
 @Test
