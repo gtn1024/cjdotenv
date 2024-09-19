@@ -21,7 +21,7 @@ cjdotenv = { git = "https://github.com/gtn1024/cjdotenv.git" }
 
 ## 使用 / Usage
 
-```toml
+```shell
 # .env
 
 # Database
