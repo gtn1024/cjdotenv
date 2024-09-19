@@ -11,10 +11,10 @@ const EXPORT_PREFIX = "export"
 let ESCAPE_REGEX = Regex("\\\\.")
 
 /**
- * Parse environment variables from a string.
+ * Parses the given data string and extracts key-value pairs into a HashMap.
  *
- * @param data The string to parse.
- * @return Key-value pairs of environment variables.
+ * @param data The input string containing the data to be parsed.
+ * @return A HashMap containing the parsed key-value pairs.
  */
 public func parse(data: String) {
     let src = data.replace("\r\n", "\n")

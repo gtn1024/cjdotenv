@@ -13,7 +13,9 @@ func filenamesOrDefault(filenames: Array<String>) {
 }
 
 /**
- * Load environment files
+ * Loads environment variables from the specified filenames.
+ *
+ * @param filenames to load the environment variables from. If no filenames are provided, `.env` will be used.
  */
 public func load(filenames: Array<String>) {
     let newFilenames = filenamesOrDefault(filenames)
