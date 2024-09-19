@@ -37,21 +37,76 @@ func parseData(src: String, out: HashMap<String, String>): Unit {
         let key: String
         var left: String
 
-        (key, left) = locateKeyName(remain)
+        (key, left) = extractKey(remain)
 
         if (key == "") {
             throw ParseException("Invalid statement near ${remain}")
         }
 
         let value: String
-        (value, left) = extractVarValue(left, out)
+        (value, left) = extractValue(left, out)
 
         out[key] = value
         remain = left
     }
 }
 
-func extractVarValue(src: String, vars: HashMap<String, String>) {
+func getStatementStart(src: String): String {
+    var pos = indexOfNonSpaceChar(src)
+    if (pos == -1) {
+        return ""
+    }
+
+    let rem = src[pos..]
+    if (Rune(rem[0]) != commentChar) {
+        return rem
+    }
+
+    pos = indexOfEnter(rem)
+    if (pos == -1) {
+        return ""
+    }
+
+    return getStatementStart(src[pos..])
+}
+
+func extractKey(src: String) {
+    var s = src.trimStart(isSpace)
+    if (s.startsWith(exportPrefix)) {
+        let tmp = s[exportPrefix.size..]
+        if (indexFunc(tmp, isSpace) == 0) {
+            s = tmp.trimStart(isSpace)
+        }
+    }
+
+    var offset = 0
+    var key = ""
+    for (i in 0..s.size) {
+        let c = Rune(s[i])
+        if (isSpace(c)) {
+            continue
+        }
+
+        match(c) {
+            case '=' => key = s[0..i]
+                        offset = i + 1
+                        break
+            case ':' => key = s[0..i]
+                        offset = i + 1
+                        break
+            case _ => if (c.isAsciiNumberOrLetter() || c == r"_") {
+                continue
+            }
+            throw ParseException("Unexpected character ${c} in variable name near ${s}")
+        }
+    }
+
+    key = key.trimEnd(isSpace)
+    let rem = s[offset..].trimStart(isSpace)
+    return (key, rem)
+}
+
+func extractValue(src: String, vars: HashMap<String, String>) {
     let hasPrefix = hasQuotePrefix(src)
     if (!hasPrefix) {
         // unquoted cvalue, read until eol
@@ -113,6 +168,28 @@ func extractVarValue(src: String, vars: HashMap<String, String>) {
     throw ParseException("Unclosed quote in ${src}")
 }
 
+func indexOfEnter(src: String) {
+    let pos = src.indexOf('\n')
+    match (pos) {
+        case Some(p) => p
+        case None => -1
+    }
+}
+
+func indexOfNonSpaceChar(src: String) {
+    for (i in 0..src.size) {
+        if (!src[i].isAsciiWhiteSpace()) {
+            return i
+        }
+    }
+
+    return -1
+}
+
+func isSpace(c: Rune): Bool {
+    [r" ", r"\t", r"\v", r"\f", r"\r"].contains(c)
+}
+
 func expandEscapes(src: String) {
     var str = ""
     var lastPos = 0
@@ -139,87 +216,6 @@ func expandEscapes(src: String) {
     str
 }
 
-func hasQuotePrefix(src: String) {
-    src.size > 0 && (Rune(src[0]) == singleQuote || Rune(src[0]) == doubleQuote)
-}
-
-func locateKeyName(src: String) {
-    var s = src.trimStart(isSpace)
-    if (s.startsWith(exportPrefix)) {
-        let tmp = s[exportPrefix.size..]
-        if (indexFunc(tmp, isSpace) == 0) {
-            s = tmp.trimStart(isSpace)
-        }
-    }
-
-    var offset = 0
-    var key = ""
-    for (i in 0..s.size) {
-        let c = Rune(s[i])
-        if (isSpace(c)) {
-            continue
-        }
-
-        match(c) {
-            case '=' => key = s[0..i]
-                        offset = i + 1
-                        break
-            case ':' => key = s[0..i]
-                        offset = i + 1
-                        break
-            case _ => if (c.isAsciiNumberOrLetter() || c == r"_") {
-                continue
-            }
-            throw ParseException("Unexpected character ${c} in variable name near ${s}")
-        }
-    }
-
-    key = key.trimEnd(isSpace)
-    let rem = s[offset..].trimStart(isSpace)
-    return (key, rem)
-}
-
-func getStatementStart(src: String): String {
-    var pos = indexOfNonSpaceChar(src)
-    if (pos == -1) {
-        return ""
-    }
-
-    let rem = src[pos..]
-    if (Rune(rem[0]) != commentChar) {
-        return rem
-    }
-
-    pos = indexOfEnter(rem)
-    if (pos == -1) {
-        return ""
-    }
-
-    return getStatementStart(src[pos..])
-}
-
-func indexOfEnter(src: String) {
-    let pos = src.indexOf('\n')
-    match (pos) {
-        case Some(p) => p
-        case None => -1
-    }
-}
-
-func indexOfNonSpaceChar(src: String) {
-    for (i in 0..src.size) {
-        if (!src[i].isAsciiWhiteSpace()) {
-            return i
-        }
-    }
-
-    return -1
-}
-
-func isSpace(c: Rune): Bool {
-    [r" ", r"\t", r"\v", r"\f", r"\r"].contains(c)
-}
-
 // (\$)\{?([A-Z0-9_]+)(:.*)?\}?
 let expandVarRegex = Regex("(\\$)\\{?([A-Z0-9_]+)(:.*)?\\}?")
 
@@ -236,7 +232,7 @@ func expandVariables(src: String, vars: HashMap<String, String>) {
         let s = v.matchStr()
         let name: String
         let default: String
-        (name, default) = getNameAndDefault(s)
+        (name, default) = getNameAndDefaultValue(s)
 
         str += match(vars.get(name)) {
             case Some(v) => v
@@ -251,7 +247,7 @@ func expandVariables(src: String, vars: HashMap<String, String>) {
     str
 }
 
-func getNameAndDefault(src: String) {
+func getNameAndDefaultValue(src: String) {
     if (Rune(src[1]) != r"{") {
         // without braces
         return (src[1..], "")
@@ -277,4 +273,8 @@ func getNameAndDefault(src: String) {
     default = default.trimStart(isSpace).trimEnd(isSpace)
 
     (name, expandEscapes(default))
+}
+
+func hasQuotePrefix(src: String) {
+    src.size > 0 && (Rune(src[0]) == singleQuote || Rune(src[0]) == doubleQuote)
 }
