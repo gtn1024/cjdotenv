@@ -3,6 +3,7 @@
   <p>A Cangjie library to load environment variables from <code>.env</code>.</p>
 </div>
 <p align="center">
+  <img alt="" src="https://img.shields.io/badge/release-v0.1.0-brightgreen" style="display: inline-block;" />
   <img alt="" src="https://img.shields.io/badge/cjc-v0.55.3-brightgreen" style="display: inline-block;" />
 </p>
 
@@ -10,13 +11,13 @@
 
 CjDotEnv is a Cangjie library to load environment variables from `.env` file.
 
-CjDotEnv 是一个用来从 `.env` 文件中加载环境变量的 Cangjie 库。
+CjDotEnv 是一个用来从 `.env` 文件中加载环境变量的仓颉库。
 
 ## 安装 / Installation
 
 ```toml
 # In the `dependencies` section of `cjpm.toml`
-cjdotenv = { git = "https://github.com/gtn1024/cjdotenv.git" }
+cjdotenv = { git = "https://github.com/gtn1024/cjdotenv.git", tag = "0.1.0" }
 ```
 
 ## 使用 / Usage
