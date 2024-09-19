@@ -3,16 +3,6 @@ package cjdotenv
 import std.collection.HashMap
 import std.regex.Regex
 
-struct Tuple<K, V> {
-    let first: K
-    let second: V
-
-    init(first: K, second: V) {
-        this.first = first
-        this.second = second
-    }
-}
-
 const commentChar = r"#"
 const singleQuote = r"\'"
 const doubleQuote = r"\""
@@ -44,16 +34,17 @@ func parseData(src: String, out: HashMap<String, String>): Unit {
             break
         }
 
-        var t = locateKeyName(remain)
-        let key = t.first
-        var left = t.second
+        let key: String
+        var left: String
+
+        (key, left) = locateKeyName(remain)
+
         if (key == "") {
             throw ParseException("Invalid statement near ${remain}")
         }
 
-        t = extractVarValue(left, out)
-        let value = t.first
-        left = t.second
+        let value: String
+        (value, left) = extractVarValue(left, out)
 
         out[key] = value
         remain = left
@@ -70,14 +61,14 @@ func extractVarValue(src: String, vars: HashMap<String, String>) {
         }
 
         if (eolIndex == 0) {
-            return Tuple("", src[eolIndex..])
+            return ("", src[eolIndex..])
         }
 
         let line = src[0..eolIndex]
 
         var endOfVar = line.size
         if (endOfVar == 0) {
-            return Tuple("", src[eolIndex..])
+            return ("", src[eolIndex..])
         }
 
         for (i in 0..line.size) {
@@ -92,7 +83,7 @@ func extractVarValue(src: String, vars: HashMap<String, String>) {
 
         let trimmed = line[0..endOfVar].trimStart(isSpace).trimEnd(isSpace)
 
-        return Tuple(expandVariables(trimmed, vars), src[eolIndex..])
+        return (expandVariables(trimmed, vars), src[eolIndex..])
     }
 
     // find the closing quote
@@ -116,7 +107,7 @@ func extractVarValue(src: String, vars: HashMap<String, String>) {
             value = expandVariables(expandEscapes(value), vars)
         }
 
-        return Tuple(value, src[i + 1..])
+        return (value, src[i + 1..])
     }
 
     throw ParseException("Unclosed quote in ${src}")
@@ -185,7 +176,7 @@ func locateKeyName(src: String) {
 
     key = key.trimEnd(isSpace)
     let rem = s[offset..].trimStart(isSpace)
-    return Tuple<String, String>(key, rem)
+    return (key, rem)
 }
 
 func getStatementStart(src: String): String {
@@ -243,9 +234,9 @@ func expandVariables(src: String, vars: HashMap<String, String>) {
         str += src[lastPos..pos.start]
 
         let s = v.matchStr()
-        let t = getNameAndDefault(s)
-        let name = t.first
-        let default = t.second
+        let name: String
+        let default: String
+        (name, default) = getNameAndDefault(s)
 
         str += match(vars.get(name)) {
             case Some(v) => v
@@ -263,13 +254,13 @@ func expandVariables(src: String, vars: HashMap<String, String>) {
 func getNameAndDefault(src: String) {
     if (Rune(src[1]) != r"{") {
         // without braces
-        return Tuple(src[1..], "")
+        return (src[1..], "")
     }
 
     let pos = src.indexOf(':') ?? -1
     if (pos == -1) {
         // without default value
-        return Tuple(src[2..src.size - 1], "")
+        return (src[2..src.size - 1], "")
     }
 
     let name = src[2..pos]
@@ -285,5 +276,5 @@ func getNameAndDefault(src: String) {
 
     default = default.trimStart(isSpace).trimEnd(isSpace)
 
-    Tuple(name, expandEscapes(default))
+    (name, expandEscapes(default))
 }
