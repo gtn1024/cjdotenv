@@ -3,12 +3,12 @@ package cjdotenv
 import std.collection.HashMap
 import std.regex.Regex
 
-const commentChar = r"#"
-const singleQuote = r"\'"
-const doubleQuote = r"\""
-const exportPrefix = "export"
+const COMMENT_CHAR = r"#"
+const SINGLE_QUOTE_CHAR = r"\'"
+const DOUBLE_QUOTE_CHAR = r"\""
+const EXPORT_PREFIX = "export"
 
-let escapeRegex = Regex("\\\\.")
+let ESCAPE_REGEX = Regex("\\\\.")
 
 /**
  * Parse environment variables from a string.
@@ -58,7 +58,7 @@ func getStatementStart(src: String): String {
     }
 
     let rem = src[pos..]
-    if (Rune(rem[0]) != commentChar) {
+    if (Rune(rem[0]) != COMMENT_CHAR) {
         return rem
     }
 
@@ -72,8 +72,8 @@ func getStatementStart(src: String): String {
 
 func extractKey(src: String) {
     var s = src.trimStart(isSpace)
-    if (s.startsWith(exportPrefix)) {
-        let tmp = s[exportPrefix.size..]
+    if (s.startsWith(EXPORT_PREFIX)) {
+        let tmp = s[EXPORT_PREFIX.size..]
         if (indexFunc(tmp, isSpace) == 0) {
             s = tmp.trimStart(isSpace)
         }
@@ -128,7 +128,7 @@ func extractValue(src: String, vars: HashMap<String, String>) {
 
         for (i in 0..line.size) {
             let c = Rune(line[i])
-            if (c == commentChar && i > 0) {
+            if (c == COMMENT_CHAR && i > 0) {
                 if (isSpace(Rune(line[i - 1]))) {
                     endOfVar = i
                     break
@@ -157,7 +157,7 @@ func extractValue(src: String, vars: HashMap<String, String>) {
         }
         var value = src[0..i].trimStart(trimFunc).trimEnd(trimFunc)
 
-        if (quoteChar == doubleQuote) {
+        if (quoteChar == DOUBLE_QUOTE_CHAR) {
             // process escape, variable substitution...
             value = expandVariables(expandEscapes(value), vars)
         }
@@ -194,7 +194,7 @@ func expandEscapes(src: String) {
     var str = ""
     var lastPos = 0
 
-    let matcher = escapeRegex.matcher(src)
+    let matcher = ESCAPE_REGEX.matcher(src)
     while (let Some(v) <- matcher.find()) {
         let pos = v.matchPosition()
 
@@ -217,13 +217,13 @@ func expandEscapes(src: String) {
 }
 
 // (\$)\{?([A-Z0-9_]+)(:.*)?\}?
-let expandVarRegex = Regex("(\\$)\\{?([A-Z0-9_]+)(:.*)?\\}?")
+let EXPAND_VARIABLE_REGEX = Regex("(\\$)\\{?([A-Z0-9_]+)(:.*)?\\}?")
 
 func expandVariables(src: String, vars: HashMap<String, String>) {
     var str = ""
     var lastPos = 0
 
-    let matcher = expandVarRegex.matcher(src)
+    let matcher = EXPAND_VARIABLE_REGEX.matcher(src)
     while (let Some(v) <- matcher.find()) {
         let pos = v.matchPosition()
 
@@ -276,5 +276,5 @@ func getNameAndDefaultValue(src: String) {
 }
 
 func hasQuotePrefix(src: String) {
-    src.size > 0 && (Rune(src[0]) == singleQuote || Rune(src[0]) == doubleQuote)
+    src.size > 0 && (Rune(src[0]) == SINGLE_QUOTE_CHAR || Rune(src[0]) == DOUBLE_QUOTE_CHAR)
 }
