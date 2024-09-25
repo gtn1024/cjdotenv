@@ -30,7 +30,7 @@ func loadFile(filename: String, overload: Bool) {
     let envMap = parse(s)
 
     let currentEnv = HashMap<String, Bool>()
-    let rawEnv = envVars()
+    let rawEnv = envVars() /*cjlint-ignore !G.CHK.01 */
 
     for ((k, v) in rawEnv) {
         currentEnv[k] = true
