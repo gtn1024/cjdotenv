@@ -1,0 +1,19 @@
+name: ci
+
+on: [push, pull_request]
+
+jobs:
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Zxilly/setup-cangjie@v1.2.1
+        with:
+          token: ${{ secrets.GITCODE_TOKEN }}
+      - name: test
+        shell: bash
+        run: cjpm test
