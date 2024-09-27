@@ -5,6 +5,12 @@ import std.unittest.testmacro.*
 import std.os.*
 import std.collection.*
 
+@When[os == "Windows"]
+let emptyString = None<String>
+
+@When[os != "Windows"]
+let emptyString = ""
+
 func clearenv() {
     for (key in envVars().keys()) {
         removeEnv(key)
@@ -105,11 +111,18 @@ func testPlain() {
     expectedValues["OPTION_C"] = "3"
     expectedValues["OPTION_D"] = "4"
     expectedValues["OPTION_E"] = "5"
-    expectedValues["OPTION_F"] = ""
-    expectedValues["OPTION_G"] = ""
+    expectedValues["OPTION_F"] = emptyString
+    expectedValues["OPTION_G"] = emptyString
     expectedValues["OPTION_H"] = "1 2"
 
-    @Expect(envVars().size, 8)
+    var expected = 0
+    for ((_, v) in expectedValues) {
+        if (v != None) {
+            expected++
+        }
+    }
+
+    @Expect(envVars().size, expected)
     for ((k, v) in expectedValues) {
         @Expect(getEnv(k), v)
     }
@@ -124,11 +137,11 @@ func testQuoted() {
     let expectedValues = HashMap<String, ?String>()
     expectedValues["OPTION_A"] = "1"
     expectedValues["OPTION_B"] = "2"
-    expectedValues["OPTION_C"] = ""
+    expectedValues["OPTION_C"] = emptyString
     expectedValues["OPTION_D"] = "\\n"
     expectedValues["OPTION_E"] = "1"
     expectedValues["OPTION_F"] = "2"
-    expectedValues["OPTION_G"] = ""
+    expectedValues["OPTION_G"] = emptyString
     expectedValues["OPTION_H"] = "\n"
     expectedValues["OPTION_I"] = "echo 'asd'"
     expectedValues["OPTION_J"] = "line 1\nline 2"
@@ -136,7 +149,14 @@ func testQuoted() {
     expectedValues["OPTION_L"] = "line 1\nline 2"
     expectedValues["OPTION_M"] = "line one\nthis is \"quoted\"\none more line"
 
-    @Expect(envVars().size, 13)
+    var expected = 0
+    for ((_, v) in expectedValues) {
+        if (v != None) {
+            expected++
+        }
+    }
+
+    @Expect(envVars().size, expected)
     for ((k, v) in expectedValues) {
         @Expect(getEnv(k), v)
     }
@@ -153,7 +173,7 @@ func testSubstitutions() {
     expectedValues["OPTION_B"] = "1"
     expectedValues["OPTION_C"] = "1"
     expectedValues["OPTION_D"] = "11"
-    expectedValues["OPTION_E"] = ""
+    expectedValues["OPTION_E"] = emptyString
     expectedValues["OPTION_F"] = "default"
     expectedValues["OPTION_G"] = "default"
     expectedValues["OPTION_H"] = "-default"
@@ -164,7 +184,14 @@ func testSubstitutions() {
     expectedValues["OPTION_N"] = "default"
     expectedValues["OPTION_M"] = "default"
 
-    @Expect(envVars().size, 14)
+    var expected = 0
+    for ((_, v) in expectedValues) {
+        if (v != None) {
+            expected++
+        }
+    }
+
+    @Expect(envVars().size, expected)
     for ((k, v) in expectedValues) {
         @Expect(getEnv(k), v)
     }
