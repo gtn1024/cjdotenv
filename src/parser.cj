@@ -109,39 +109,42 @@ func extractKey(src: String) {
 func extractValue(src: String, vars: HashMap<String, String>) {
     let hasPrefix = hasQuotePrefix(src)
     if (!hasPrefix) {
-        // unquoted cvalue, read until eol
-        var eolIndex = indexOfEnter(src)
-        if (eolIndex == -1) {
-            eolIndex = src.size
-        }
+        return extractUnquotedValue(src, vars)
+    }
+    extractQuotedValue(src, vars)
+}
 
-        if (eolIndex == 0) {
-            return ("", src[eolIndex..])
-        }
-
-        let line = src[0..eolIndex]
-
-        var endOfVar = line.size
-        if (endOfVar == 0) {
-            return ("", src[eolIndex..])
-        }
-
-        for (i in 0..line.size) {
-            let c = Rune(line[i])
-            if (c == COMMENT_CHAR && i > 0) {
-                if (isSpace(Rune(line[i - 1]))) {
-                    endOfVar = i
-                    break
-                }
-            }
-        }
-
-        let trimmed = line[0..endOfVar].trimStart(isSpace).trimEnd(isSpace)
-
-        return (expandVariables(trimmed, vars), src[eolIndex..])
+func extractUnquotedValue(src: String, vars: HashMap<String, String>) {
+    var eolIndex = indexOfEnter(src)
+    if (eolIndex == -1) {
+        eolIndex = src.size
     }
 
-    // find the closing quote
+    if (eolIndex == 0) {
+        return ("", src[eolIndex..])
+    }
+
+    let line = src[0..eolIndex]
+    var endOfVar = line.size
+    if (endOfVar == 0) {
+        return ("", src[eolIndex..])
+    }
+
+    for (i in 0..line.size) {
+        let c = Rune(line[i])
+        if (c == COMMENT_CHAR && i > 0) {
+            if (isSpace(Rune(line[i - 1]))) {
+                endOfVar = i
+                break
+            }
+        }
+    }
+
+    let trimmed = line[0..endOfVar].trimStart(isSpace).trimEnd(isSpace)
+    (expandVariables(trimmed, vars), src[eolIndex..])
+}
+
+func extractQuotedValue(src: String, vars: HashMap<String, String>) {
     let quoteChar = Rune(src[0])
     for (i in 1..src.size) {
         if (Rune(src[i]) != quoteChar) {
@@ -158,7 +161,6 @@ func extractValue(src: String, vars: HashMap<String, String>) {
         var value = src[0..i].trimStart(trimFunc).trimEnd(trimFunc)
 
         if (quoteChar == DOUBLE_QUOTE_CHAR) {
-            // process escape, variable substitution...
             value = expandVariables(expandEscapes(value), vars)
         }
 
