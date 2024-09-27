@@ -6,5 +6,6 @@ func indexFunc(s: String, predicate: (Rune) -> Bool) {
             return i
         }
     }
-    return -1
+
+    -1
 }

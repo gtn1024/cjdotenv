@@ -9,7 +9,7 @@ func filenamesOrDefault(filenames: Array<String>) {
     if (filenames.isEmpty()) {
         return [".env"]
     }
-    return filenames
+    filenames
 }
 
 /**
@@ -51,5 +51,5 @@ func getFileData(filename: String) {
     }
 
     let data = String.fromUtf8(bytes)
-    return data
+    data
 }

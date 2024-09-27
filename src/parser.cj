@@ -67,7 +67,7 @@ func getStatementStart(src: String): String {
         return ""
     }
 
-    return getStatementStart(rem[pos..])
+    getStatementStart(rem[pos..])
 }
 
 func extractKey(src: String) {
@@ -103,7 +103,7 @@ func extractKey(src: String) {
 
     key = key.trimEnd(isSpace)
     let rem = s[offset..].trimStart(isSpace)
-    return (key, rem)
+    (key, rem)
 }
 
 func extractValue(src: String, vars: HashMap<String, String>) {
@@ -185,7 +185,7 @@ func indexOfNonSpaceChar(src: String) {
         }
     }
 
-    return -1
+    -1
 }
 
 func isSpace(c: Rune): Bool {
