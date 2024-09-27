@@ -51,3 +51,9 @@ main() {
     println(getEnv("DB_DATABASE"))
 }
 ```
+
+## QQ 群
+
+欢迎加入 [仓颉交流群（非官方）：985038695](https://qm.qq.com/q/PcRbAUJSo0)
+
+![qqgroup](./.github/qqgroup.jpg)
