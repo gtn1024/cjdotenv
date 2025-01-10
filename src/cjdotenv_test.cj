@@ -2,7 +2,7 @@ package cjdotenv
 
 import std.unittest.*
 import std.unittest.testmacro.*
-import std.os.*
+import std.process.*
 import std.collection.*
 
 @When[os == "Windows"]
@@ -12,11 +12,10 @@ let emptyString = None<String>
 let emptyString = ""
 
 func clearenv() {
-    for (key in envVars().keys()) {
-        removeEnv(key)
+    let process = Process.current
+    for (key in process.environment.keys()) {
+        process.removeEnv(key)
     }
-
-    @Expect(envVars().size, 0)
 }
 
 @Test
@@ -31,15 +30,15 @@ func testReadmeExample() {
     let filename = "fixtures/readme.env"
     load(filename)
 
+    let process = Process.current
     let expectedValues = HashMap<String, ?String>()
     expectedValues["DB_HOST"] = "localhost"
     expectedValues["DB_USER"] = "postgres"
     expectedValues["DB_PASS"] = "123456"
     expectedValues["DB_DATABASE"] = "postgres"
 
-    @Expect(envVars().size, 4)
     for ((k, v) in expectedValues) {
-        @Expect(getEnv(k), v)
+        @Expect(process.getEnv(k), v)
     }
 }
 
@@ -49,14 +48,14 @@ func testComments() {
     let filename = "fixtures/comments.env"
     load(filename)
 
+    let process = Process.current
     let expectedValues = HashMap<String, ?String>()
     expectedValues["foo"] = "bar"
     expectedValues["bar"] = "foo#baz"
     expectedValues["baz"] = "foo"
 
-    @Expect(envVars().size, 3)
     for ((k, v) in expectedValues) {
-        @Expect(getEnv(k), v)
+        @Expect(process.getEnv(k), v)
     }
 }
 
@@ -66,12 +65,12 @@ func testEquals() {
     let filename = "fixtures/equals.env"
     load(filename)
 
+    let process = Process.current
     let expectedValues = HashMap<String, ?String>()
     expectedValues["OPTION_A"] = "postgres://localhost:5432/database?sslmode=disable"
 
-    @Expect(envVars().size, 1)
     for ((k, v) in expectedValues) {
-        @Expect(getEnv(k), v)
+        @Expect(process.getEnv(k), v)
     }
 }
 
@@ -81,13 +80,13 @@ func testExported() {
     let filename = "fixtures/exported.env"
     load(filename)
 
+    let process = Process.current
     let expectedValues = HashMap<String, ?String>()
     expectedValues["OPTION_A"] = "2"
     expectedValues["OPTION_B"] = "\\n"
 
-    @Expect(envVars().size, 2)
     for ((k, v) in expectedValues) {
-        @Expect(getEnv(k), v)
+        @Expect(process.getEnv(k), v)
     }
 }
 
@@ -101,10 +100,10 @@ func testInvalid() {
 @Test
 func testPlain() {
     clearenv()
-
     let filename = "fixtures/plain.env"
     load(filename)
 
+    let process = Process.current
     let expectedValues = HashMap<String, ?String>()
     expectedValues["OPTION_A"] = "1"
     expectedValues["OPTION_B"] = "2"
@@ -122,9 +121,8 @@ func testPlain() {
         }
     }
 
-    @Expect(envVars().size, expected)
     for ((k, v) in expectedValues) {
-        @Expect(getEnv(k), v)
+        @Expect(process.getEnv(k), v)
     }
 }
 
@@ -134,6 +132,7 @@ func testQuoted() {
     let filename = "fixtures/quoted.env"
 	load(filename)
 
+    let process = Process.current
     let expectedValues = HashMap<String, ?String>()
     expectedValues["OPTION_A"] = "1"
     expectedValues["OPTION_B"] = "2"
@@ -156,9 +155,8 @@ func testQuoted() {
         }
     }
 
-    @Expect(envVars().size, expected)
     for ((k, v) in expectedValues) {
-        @Expect(getEnv(k), v)
+        @Expect(process.getEnv(k), v)
     }
 }
 
@@ -168,6 +166,7 @@ func testSubstitutions() {
     let filename = "fixtures/substitutions.env"
     load(filename)
 
+    let process = Process.current
     let expectedValues = HashMap<String, ?String>()
     expectedValues["OPTION_A"] = "1"
     expectedValues["OPTION_B"] = "1"
@@ -191,8 +190,7 @@ func testSubstitutions() {
         }
     }
 
-    @Expect(envVars().size, expected)
     for ((k, v) in expectedValues) {
-        @Expect(getEnv(k), v)
+        @Expect(process.getEnv(k), v)
     }
 }

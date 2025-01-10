@@ -2,7 +2,7 @@ package cjdotenv
 
 import std.fs.File
 import std.collection.HashMap
-import std.os.{envVars, setEnv}
+import std.process.{Process, CurrentProcess}
 import std.fs.FSException
 
 func filenamesOrDefault(filenames: Array<String>) {
@@ -20,17 +20,18 @@ func filenamesOrDefault(filenames: Array<String>) {
 public func load(filenames: Array<String>) {
     let newFilenames = filenamesOrDefault(filenames)
 
+    let process = Process.current
     for (filename in newFilenames) {
-        loadFile(filename, false)
+        loadFile(filename, false, process)
     }
 }
 
-func loadFile(filename: String, overload: Bool) {
+func loadFile(filename: String, overload: Bool, process: CurrentProcess) {
     let s = getFileData(filename)
     let envMap = parse(s)
 
     let currentEnv = HashMap<String, Bool>()
-    let rawEnv = envVars() /*cjlint-ignore !G.CHK.01 */
+    let rawEnv = process.environment
 
     for ((k, v) in rawEnv) {
         currentEnv[k] = true
@@ -38,7 +39,7 @@ func loadFile(filename: String, overload: Bool) {
 
     for ((k, v) in envMap) {
         if (!currentEnv.contains(k) || overload) {
-            setEnv(k, v)
+            process.setEnv(k, v)
         }
     }
 }
