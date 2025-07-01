@@ -3,6 +3,7 @@ package cjdotenv
 import std.fs.File
 import std.collection.HashMap
 import std.process.{Process, CurrentProcess}
+import std.env.{getVariables, setVariable}
 import std.fs.FSException
 
 func filenamesOrDefault(filenames: Array<String>) {
@@ -20,18 +21,17 @@ func filenamesOrDefault(filenames: Array<String>) {
 public func load(filenames: Array<String>) {
     let newFilenames = filenamesOrDefault(filenames)
 
-    let process = Process.current
     for (filename in newFilenames) {
-        loadFile(filename, false, process)
+        loadFile(filename, false)
     }
 }
 
-func loadFile(filename: String, overload: Bool, process: CurrentProcess) {
+func loadFile(filename: String, overload: Bool) {
     let s = getFileData(filename)
     let envMap = parse(s)
 
     let currentEnv = HashMap<String, Bool>()
-    let rawEnv = process.environment
+    let rawEnv = getVariables()
 
     for ((k, v) in rawEnv) {
         currentEnv[k] = true
@@ -39,7 +39,7 @@ func loadFile(filename: String, overload: Bool, process: CurrentProcess) {
 
     for ((k, v) in envMap) {
         if (!currentEnv.contains(k) || overload) {
-            process.setEnv(k, v)
+            setVariable(k, v)
         }
     }
 }
