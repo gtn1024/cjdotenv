@@ -3,10 +3,9 @@
   <p>A Cangjie library to load environment variables from <code>.env</code>.</p>
 </div>
 <p align="center">
-  <img alt="" src="https://img.shields.io/badge/release-v0.3.0-brightgreen" style="display: inline-block;" />
-  <img alt="" src="https://img.shields.io/badge/cjc-v0.58.3-brightgreen" style="display: inline-block;" />
+  <img alt="" src="https://img.shields.io/badge/release-v0.4.0-brightgreen" style="display: inline-block;" />
+  <img alt="" src="https://img.shields.io/badge/cjc-v1.0.0-brightgreen" style="display: inline-block;" />
   <img alt="" src="https://github.com/gtn1024/cjdotenv/actions/workflows/ci.yml/badge.svg" style="display: inline-block;" />
-  <img alt="" src="https://wakatime.com/badge/user/e6f96ccc-06db-4ccd-b529-315ffa2a1082/project/b0d15d47-129c-4873-99a3-19750e2c55db.svg" style="display: inline-block;" />
 </p>
 
 ## 介绍 / Introduction
@@ -19,7 +18,7 @@ CjDotEnv 是一个用来从 `.env` 文件中加载环境变量的仓颉库。
 
 ```toml
 # In the `dependencies` section of `cjpm.toml`
-cjdotenv = { git = "https://github.com/gtn1024/cjdotenv.git", tag = "0.3.0" }
+cjdotenv = { git = "https://github.com/gtn1024/cjdotenv.git", tag = "0.4.0" }
 ```
 
 ## 使用 / Usage
