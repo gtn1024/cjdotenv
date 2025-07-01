@@ -1,12 +1,12 @@
 [dependencies]
 
 [package]
-  cjc-version = "0.58.3"
+  cjc-version = "1.0.0"
   compile-option = ""
   description = "A Cangjie library to load environment variables from `.env`."
   link-option = ""
   name = "cjdotenv"
-  output-type = "dynamic"
+  output-type = "static"
   override-compile-option = ""
   src-dir = ""
   target-dir = ""

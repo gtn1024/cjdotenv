@@ -196,13 +196,13 @@ func expandEscapes(src: String) {
     var str = ""
     var lastPos = 0
 
-    let matcher = ESCAPE_REGEX.matcher(src)
-    while (let Some(v) <- matcher.find()) {
+    let matcheres = ESCAPE_REGEX.findAll(src)
+    for (v in matcheres) {
         let pos = v.matchPosition()
 
         str += src[lastPos..pos.start]
 
-        let s = v.matchStr()
+        let s = v.matchString()
         let c = s[1..]
         match (c) {
             case "n" => str += "\n"
@@ -225,13 +225,13 @@ func expandVariables(src: String, vars: HashMap<String, String>) {
     var str = ""
     var lastPos = 0
 
-    let matcher = EXPAND_VARIABLE_REGEX.matcher(src)
-    while (let Some(v) <- matcher.find()) {
+    let matcheres = EXPAND_VARIABLE_REGEX.findAll(src)
+    for (v in matcheres) {
         let pos = v.matchPosition()
 
         str += src[lastPos..pos.start]
 
-        let s = v.matchStr()
+        let s = v.matchString()
         let name: String
         let default: String
         (name, default) = getNameAndDefaultValue(s)
