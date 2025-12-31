@@ -8,7 +8,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, ubuntu-latest-arm, macos-latest, windows-latest]
-        cangjie-versions: [1.0.0, 1.0.1, 1.0.2, 1.0.3, 1.0.4, lts]
+        cangjie-versions: [1.0.0, 1.0.1, 1.0.2, 1.0.3, 1.0.4, latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
