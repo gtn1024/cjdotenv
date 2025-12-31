@@ -7,13 +7,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, ubuntu-latest-arm, macos-latest, windows-latest]
+        cangjie-versions: [1.0.0, 1.0.1, 1.0.2, 1.0.3, 1.0.4, lts]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: Zxilly/setup-cangjie@v1.8.0
         with:
-          channel: lts
+          version: ${{ matrix.cangjie-versions }}
       - name: build
         shell: bash
         run: cjpm build

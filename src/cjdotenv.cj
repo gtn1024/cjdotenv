@@ -2,7 +2,6 @@ package cjdotenv
 
 import std.fs.File
 import std.collection.HashMap
-import std.process.{Process, CurrentProcess}
 import std.env.{getVariables, setVariable}
 import std.fs.FSException
 
