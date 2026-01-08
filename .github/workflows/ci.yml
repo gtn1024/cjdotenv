@@ -8,11 +8,11 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest, windows-latest]
-        cangjie-versions: [1.0.0, 1.0.1, 1.0.3, 1.0.4, latest, nightly]
+        cangjie-versions: [1.0.0, 1.0.1, 1.0.3, 1.0.4, latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: Zxilly/setup-cangjie@v2
+      - uses: Zxilly/setup-cangjie@v2.0.0
         with:
           version: ${{ matrix.cangjie-versions }}
       - name: build
