@@ -16,7 +16,7 @@ let ESCAPE_REGEX = Regex("\\\\.")
  * @param data The input string containing the data to be parsed.
  * @return A HashMap containing the parsed key-value pairs.
  */
-public func parse(data: String) {
+public func parse(data: String): HashMap<String, String> {
     let src = data.replace("\r\n", "\n")
 
     let vars = HashMap<String, String>()
